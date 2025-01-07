@@ -32,6 +32,8 @@ class Tweet(Base):
     __mapper_args__ = {"confirm_deleted_rows": False}
 
     def __repr__(self):
-        return (f"Tweet(id={self.id}, content={self.content}, "
-                f"created_at={self.created_at}, user_id={self.user_id},"
-                f"likes={self.likes}, images={self.images})")
+        return (
+            f"Tweet(id={self.id}, content={self.content}, "
+            f"created_at={self.created_at}, user_id={self.user_id},"
+            f"likes={self.likes}, images={self.images})"
+        )

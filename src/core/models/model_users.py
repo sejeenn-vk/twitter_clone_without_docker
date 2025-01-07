@@ -8,14 +8,10 @@ from sqlalchemy import String, Table, Column, Integer, ForeignKey
 
 
 followers_tbl = Table(
-    'followers_tbl',
+    "followers_tbl",
     Base.metadata,
-    Column(
-        'follower_id', Integer, ForeignKey('users.id'), primary_key=True
-    ),
-    Column(
-        'followed_id', Integer, ForeignKey('users.id'), primary_key=True
-    ),
+    Column("follower_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("followed_id", Integer, ForeignKey("users.id"), primary_key=True),
 )
 
 
@@ -23,6 +19,7 @@ class User(Base):
     """
     Модель хранения пользователей
     """
+
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     api_key: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
@@ -54,5 +51,4 @@ class User(Base):
     __mapper_args__ = {"confirm_deleted_rows": False}
 
     def __repr__(self):
-        return (f"User(id={self.id}, name={self.name}, "
-                f"api_key={self.api_key})")
+        return f"User(id={self.id}, name={self.name}, " f"api_key={self.api_key})"

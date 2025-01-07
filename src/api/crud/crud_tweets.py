@@ -6,16 +6,16 @@ from src.core.models import User, Tweet, Like
 
 
 async def get_all_tweets(
-        session: AsyncSession,
-        current_user: User,
+    session: AsyncSession,
+    current_user: User,
 ):
     """
-        Пользователь может получить ленту из твитов отсортированных в
-        порядке убывания по популярности от пользователей, которых он
-        читает.
-        :param current_user:
-        :param session:
-        :return:
+    Пользователь может получить ленту из твитов отсортированных в
+    порядке убывания по популярности от пользователей, которых он
+    читает.
+    :param current_user:
+    :param session:
+    :return:
     """
     stmt = (
         select(Tweet)
@@ -27,7 +27,6 @@ async def get_all_tweets(
         )
         .group_by(Tweet.id)
         .order_by(desc(func.count(Like.id)))
-
     )
     result = await session.execute(stmt)
     tweets = result.unique().scalars().all()
