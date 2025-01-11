@@ -13,23 +13,20 @@ async def get_all_tweets(
     Пользователь может получить ленту из твитов отсортированных в
     порядке убывания по популярности от пользователей, которых он
     читает.
-    :param current_user:
-    :param session:
-    :return:
     """
     stmt = (
-        select(Tweet)
+        select(Tweet, func.count(Tweet.likes).label("likes_count"))
         .filter(Tweet.user_id.in_(user.id for user in current_user.followed))
         .options(
             joinedload(Tweet.user),
             joinedload(Tweet.likes).subqueryload(Like.user),
             joinedload(Tweet.images),
         )
-        .group_by(Tweet.id)
-        .order_by(desc(func.count(Like.id)))
+        .join(Tweet.likes)
+        .group_by(Tweet)
+        .order_by(desc("likes_count"))
     )
     result = await session.execute(stmt)
     tweets = result.unique().scalars().all()
-    res_all = await session.execute(stmt)
-    print("=================================", res_all.unique().fetchall())
+
     return tweets
