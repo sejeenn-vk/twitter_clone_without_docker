@@ -25,34 +25,36 @@ TOKEN = APITokenHeader(name="api-key")
 
 
 async def get_user_by_api_key(
-        session: AsyncSession,
-        api_key: str,
+    session: AsyncSession,
+    api_key: str,
 ) -> User:
-    stmt = (select(User)
-            .where(User.api_key == api_key)
-            .options(joinedload(User.followers).load_only(User.id, User.name))
-            .options(joinedload(User.followed).load_only(User.id, User.name))
-            )
+    stmt = (
+        select(User)
+        .where(User.api_key == api_key)
+        .options(joinedload(User.followers).load_only(User.id, User.name))
+        .options(joinedload(User.followed).load_only(User.id, User.name))
+    )
     result = await session.scalars(stmt)
     return result.unique().one()
 
 
 async def get_user_by_user_id(
-        session: AsyncSession,
-        user_id,
+    session: AsyncSession,
+    user_id,
 ) -> User:
-    stmt = (select(User)
-            .where(User.id == user_id)
-            .options(joinedload(User.followers).load_only(User.id, User.name))
-            .options(joinedload(User.followed).load_only(User.id, User.name))
-            )
+    stmt = (
+        select(User)
+        .where(User.id == user_id)
+        .options(joinedload(User.followers).load_only(User.id, User.name))
+        .options(joinedload(User.followed).load_only(User.id, User.name))
+    )
     result = await session.scalars(stmt)
     return result.unique().one()
 
 
 async def create_user(
-        session: AsyncSession,
-        user_create: CreateUserSchema,
+    session: AsyncSession,
+    user_create: CreateUserSchema,
 ) -> User:
     user = User(**user_create.model_dump())
     session.add(user)
@@ -61,12 +63,17 @@ async def create_user(
 
 
 async def get_current_user(
-        session: Annotated[
-            AsyncSession,
-            Depends(db_helper.session_getter),],
-        token: str = Security(TOKEN)
+    session: Annotated[
+        AsyncSession,
+        Depends(db_helper.session_getter),
+    ],
+    token: str = Security(TOKEN),
 ):
-    stmt = select(User).where(User.api_key == token).options(joinedload(User.followed).load_only(User.id, User.name))
+    stmt = (
+        select(User)
+        .where(User.api_key == token)
+        .options(joinedload(User.followed).load_only(User.id, User.name))
+    )
     result = await session.scalars(stmt)
     user = result.unique().one()
     return user
