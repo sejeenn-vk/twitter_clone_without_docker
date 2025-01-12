@@ -50,5 +50,5 @@ class User(Base):
     # Отключаем проверку строк, тем самым убирая уведомление, возникающее при удалении несуществующей строки
     __mapper_args__ = {"confirm_deleted_rows": False}
 
-    def __repr__(self):
-        return f"User(id={self.id}, name={self.name}, " f"api_key={self.api_key})"
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(id={self.id}, name={self.name})"
