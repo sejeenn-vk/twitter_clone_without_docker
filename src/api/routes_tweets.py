@@ -30,4 +30,5 @@ async def get_tweets_follow_user(
     tweets = await crud_tweets.get_all_tweets(
         session=session, current_user=current_user
     )
+
     return {"tweets": tweets}
