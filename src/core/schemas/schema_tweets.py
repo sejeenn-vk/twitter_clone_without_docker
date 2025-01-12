@@ -1,7 +1,8 @@
-from typing import Optional, List
+from typing import List
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from .schema_images import ImagePathSchema
 from .schema_users import BaseUserSchema
 from .schema_likes import LikeSchema
 
@@ -31,6 +32,16 @@ class TweetOutSchema(BaseModel):
     user: BaseUserSchema = Field(alias="author")
     likes: List[LikeSchema]
     images: List[str] = Field(alias="attachments")
+
+    @field_validator("images", mode="before")
+    def serialize_images(cls, val: List[ImagePathSchema]):
+        """
+        Возвращаем список строк, ссылками на изображение
+        """
+        if isinstance(val, list):
+            return [v.path_media for v in val]
+
+        return val
 
     model_config = ConfigDict(
         from_attributes=True,
