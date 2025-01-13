@@ -1,5 +1,16 @@
+import os
+
 from pydantic import BaseModel, PostgresDsn
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ALLOWED_EXTENSIONS = {
+    "png",
+    "jpg",
+    "jpeg",
+    "gif",
+}
+STATIC_FOLDER = os.path.join(".", "nginx", "static")
+IMAGES_FOLDER = os.path.join(STATIC_FOLDER, "images")
 
 
 class DatabaseConfig(BaseModel):
