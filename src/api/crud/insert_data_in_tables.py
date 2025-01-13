@@ -46,12 +46,16 @@ like_data = [
     {"user_id": 3, "tweet_id": 5},
     {"user_id": 4, "tweet_id": 5},
     {"user_id": 5, "tweet_id": 5},
+    {"user_id": 5, "tweet_id": 1},
 ]
 
 followed_data = [
     {"follower_id": 1, "followed_id": 2},
     {"follower_id": 1, "followed_id": 3},
     {"follower_id": 1, "followed_id": 5},
+    {"follower_id": 5, "followed_id": 1},
+    {"follower_id": 2, "followed_id": 3},
+    {"follower_id": 3, "followed_id": 1},
 ]
 
 image_data = [
