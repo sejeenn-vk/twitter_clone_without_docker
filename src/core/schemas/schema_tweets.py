@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
@@ -55,3 +55,16 @@ class TweetListSchema(BaseModel):
     """
 
     tweets: List[TweetOutSchema]
+
+
+class TweetInSchema(BaseModel):
+    """
+    Схема для входных данных при добавлении нового твита
+    """
+
+    tweet_data: str = Field()
+    tweet_media_ids: Optional[list[int]]
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,  # Использовать псевдоним вместо названия поля
+    )
