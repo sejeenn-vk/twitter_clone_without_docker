@@ -51,7 +51,7 @@ async def create_directory(path: str) -> None:
     os.makedirs(path)  # Создание нескольких вложенных папок
 
 
-async def save_image(file: UploadFile, avatar=False) -> str:
+async def writing_file_to_hdd(file: UploadFile, avatar=False) -> str:
     """
     Сохранение изображения
     :param avatar: переключатель для сохранения аватара пользователя или изображения к твиту
