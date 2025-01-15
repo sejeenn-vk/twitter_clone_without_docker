@@ -32,6 +32,12 @@ tweet_data = [
         "user_id": 5,
         "created_at": datetime.datetime.now(),
     },
+    {
+        "content": "Пока народ безграмотен, из всех искусств "
+        "важнейшими для нас являются кино и цирк",
+        "user_id": 2,
+        "created_at": datetime.datetime.now(),
+    },
 ]
 
 like_data = [
