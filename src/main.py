@@ -7,6 +7,7 @@ from core.models import Base
 from api.crud.insert_data_in_tables import insert_data
 from api.routes_users import users_route
 from api.routes_tweets import tweets_route
+from api.routes_medias import medias_route
 
 
 @asynccontextmanager
@@ -27,6 +28,7 @@ async def lifespan(app: FastAPI):
 main_app = FastAPI(lifespan=lifespan)
 main_app.include_router(users_route)
 main_app.include_router(tweets_route)
+main_app.include_router(medias_route)
 
 
 if __name__ == "__main__":
