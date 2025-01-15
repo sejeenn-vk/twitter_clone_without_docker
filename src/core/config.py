@@ -9,7 +9,7 @@ ALLOWED_EXTENSIONS = {
     "jpeg",
     "gif",
 }
-STATIC_FOLDER = os.path.join(".", "nginx", "static")
+STATIC_FOLDER = "/usr/share/nginx/static"
 IMAGES_FOLDER = os.path.join(STATIC_FOLDER, "images")
 
 
