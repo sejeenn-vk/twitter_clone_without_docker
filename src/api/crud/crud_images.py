@@ -1,21 +1,25 @@
-from itertools import chain
-from typing import List
-
 from fastapi import UploadFile
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import update, select
 
 from src.core.models.model_images import Image
-from src.utils.images import save_image, delete_images
+from src.utils.images import writing_file_to_hdd
 
 
-async def image_save(image: UploadFile, session: AsyncSession) -> int:
+async def image_save(image_file: UploadFile, session: AsyncSession) -> int:
     """
     Сохранение изображения (без привязки к твиту)
     """
-    path = await save_image(file=image)  # Сохранение изображения в файловой системе
+    # Сохранение изображения в файловой системе
+    path = await writing_file_to_hdd(file=image_file)
     image_obj = Image(path_media=path)  # Создание экземпляра изображения
     session.add(image_obj)  # Добавление изображения в БД
     await session.commit()  # Сохранение в БД
 
     return image_obj.id
+
+
+async def update_image(tweet_media_ids, tweet_id, session: AsyncSession):
+    query = update(Image).where(Image.id.in_(tweet_media_ids)).values(tweet_id=tweet_id)
+    await session.execute(query)
+    await session.commit()
