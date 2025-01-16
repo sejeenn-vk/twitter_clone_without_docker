@@ -1,11 +1,12 @@
 import datetime
-
-from sqlalchemy import select, func, desc
+from loguru import logger
+from sqlalchemy import select, func, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from src.core.models import User, Tweet, Like
 from src.core.schemas.schema_tweets import TweetInSchema
 from src.api.crud.crud_images import update_image
+from src.utils.images import delete_image_from_hdd
 
 
 async def get_tweets(
@@ -70,3 +71,21 @@ async def create_tweet(
     await session.commit()
 
     return new_tweet
+
+
+async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
+    # получаем твит, который нужно удалить, из него нужно вытащить
+    # путь к файлу path_media
+    tweet_stmt = (
+        select(Tweet).where(Tweet.id == tweet_id).options(joinedload(Tweet.images))
+    )
+    result = await session.execute(tweet_stmt)
+    list_images = result.unique().scalars().one().images
+
+    logger.info(f"Удаление твита по его tweet_id = {tweet_id}")
+    stmt = delete(Tweet).where(Tweet.id == tweet_id)
+
+    # # Удаляем изображения твита из файловой системы
+    await delete_image_from_hdd(images=list_images)
+    await session.execute(stmt)
+    await session.commit()
