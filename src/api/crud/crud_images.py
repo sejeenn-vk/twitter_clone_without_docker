@@ -14,7 +14,7 @@ async def image_save(image_file: UploadFile, session: AsyncSession) -> int:
     """
     # Сохранение изображения в файловой системе
     logger.info("Сохранение картинки на жесткий диск")
-    path = await writing_file_to_hdd(file=image_file)
+    path = await writing_file_to_hdd(image_file=image_file)
     image_obj = Image(path_media=path)  # Создание экземпляра изображения
     logger.info("Запись информации о картинке в БД")
     session.add(image_obj)  # Добавление изображения в БД

@@ -1,4 +1,6 @@
 import datetime
+from http import HTTPStatus
+
 from loguru import logger
 from sqlalchemy import select, func, desc, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +8,7 @@ from sqlalchemy.orm import joinedload
 from src.core.models import User, Tweet, Like
 from src.core.schemas.schema_tweets import TweetInSchema
 from src.api.crud.crud_images import update_image
+from src.utils.exeptions import CustomApiException
 from src.utils.images import delete_image_from_hdd
 
 
@@ -18,9 +21,15 @@ async def get_tweets(
     порядке убывания по популярности от пользователей, которых он
     читает.
     """
+    # Чтобы можно было видеть не только твиты пользователей, но и свои
+    # создается список id-пользователей на которых подписан текущий пользователь
+    # плюс сам текущий пользователь
+    followed_ids = [user.id for user in current_user.followed]
+    followed_ids.append(current_user.id)
+
     stmt = (
         select(Tweet, func.count(Tweet.likes).label("likes_count"))
-        .filter(Tweet.user_id.in_(user.id for user in current_user.followed))
+        .filter(Tweet.user_id.in_(followed_ids))
         .options(
             joinedload(Tweet.user),
             joinedload(Tweet.likes).subqueryload(Like.user),
@@ -74,18 +83,32 @@ async def create_tweet(
 
 
 async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
+
     # получаем твит, который нужно удалить, из него нужно вытащить
     # путь к файлу path_media
     tweet_stmt = (
         select(Tweet).where(Tweet.id == tweet_id).options(joinedload(Tweet.images))
     )
     result = await session.execute(tweet_stmt)
-    list_images = result.unique().scalars().one().images
+    tweet = result.unique().scalars().one()
 
-    logger.info(f"Удаление твита по его tweet_id = {tweet_id}")
-    stmt = delete(Tweet).where(Tweet.id == tweet_id)
+    # проверяем, пользователя, свой ли твит он пытается удалить
+    if tweet.user_id != user.id:
+        logger.error("Запрос на удаление чужого твита")
 
-    # # Удаляем изображения твита из файловой системы
-    await delete_image_from_hdd(images=list_images)
-    await session.execute(stmt)
-    await session.commit()
+        raise CustomApiException(
+            status_code=HTTPStatus.LOCKED,  # 423
+            detail="The tweet that is being accessed is locked",
+        )
+    else:
+        logger.debug(f"Удаление твита по его tweet_id = {tweet_id} из базы данных")
+        # Удаляем изображения твита из файловой системы, если есть
+        if not tweet.images:
+            logger.debug("Изображений нет, удалять нечего")
+        else:
+            await delete_image_from_hdd(tweet.images)
+        # Удаляем твит из базы данных
+        stmt = delete(Tweet).where(Tweet.id == tweet_id)
+        await session.execute(stmt)
+        await session.commit()
+        logger.debug(f"Твит '{tweet.content[:5]}...' был удалён!")
