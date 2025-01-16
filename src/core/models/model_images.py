@@ -10,7 +10,9 @@ class Image(Base):
     """
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id"), nullable=True)
+    tweet_id: Mapped[int] = mapped_column(
+        ForeignKey("tweets.id", ondelete="CASCADE"), nullable=True
+    )
     path_media: Mapped[str]
 
     __mapper_args__ = {"confirm_deleted_rows": False}
