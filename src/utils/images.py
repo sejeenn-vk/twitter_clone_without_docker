@@ -93,14 +93,22 @@ async def writing_file_to_hdd(file: UploadFile, avatar=False) -> str:
         return clear_path(path=full_path)
 
 
-async def delete_images(images: List[Image]) -> None:
+async def delete_image_from_hdd(images: List[Image]):
     """
-    Удаление из файловой системы изображений
-    :param images: объекты изображений из БД
+    Удаление картинки с жесткого диска
+    :param images: список объектов Image
     :return: None
     """
     logger.debug(f"Удаление изображений из файловой системы")
+    # folder = os.path.join(
+    #     "static", images[0].path_media.rsplit("/", 1)[0].rsplit("\\", 1)[0]
+    # )
+    print(os.path.join("static", images[0].path_media))
+    # os.remove(os.path.join("static", images[0].path_media))
+    # logger.debug(f"Изображение №{images[0].id} - {images[0].path_media} удалено")
 
+
+async def delete_image(images: List[Image]) -> None:
     # Директория с изображениями к твиту
     folder = os.path.join(
         "static", images[0].path_media.rsplit("/", 1)[0].rsplit("\\", 1)[0]
