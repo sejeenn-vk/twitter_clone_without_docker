@@ -3,6 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.crud.crud_users import (
+    get_current_user,
+    unsubscribe_from_user,
+    subscribe_to_user,
+)
+from src.core.models import User
 from src.core.models.db_helper import db_helper
 from src.core.schemas.schema_users import (
     FullUserSchema,
@@ -70,3 +76,37 @@ async def get_user_by_id(
         },
     }
     return data
+
+
+@users_route.delete("/{user_id}/follow")
+async def unfollow_from_user(
+    user_id: int,
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """
+    Отписаться от пользователя
+    :param user_id: id-пользователя от которого хотите отписаться
+    :param session: асинхронная сессия
+    :param current_user: ваш текущий пользователь
+    :return: json {"result": true}
+    """
+    await unsubscribe_from_user(user=current_user, user_id=user_id, session=session)
+    return {"result": True}
+
+
+@users_route.post("/{user_id}/follow")
+async def follow_to_user(
+    user_id: int,
+    session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """
+    Подписаться на пользователя
+    :param user_id: id-пользователя на которого подписываетесь
+    :param session: асинхронная сессия
+    :param current_user: ваш текущий пользователь
+    :return: json {"result": true}
+    """
+    await subscribe_to_user(user=current_user, user_id=user_id, session=session)
+    return {"result": True}
