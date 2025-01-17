@@ -9,7 +9,7 @@ from src.core.models.model_images import Image
 users_data = [
     {"name": "Евгений Воронцов", "api_key": "test"},
     {"name": "Владимир Ульянов", "api_key": "lenin"},
-    {"name": "Александр пушкин", "api_key": "pushkin"},
+    {"name": "Александр Пушкин", "api_key": "pushkin"},
     {"name": "Лев Толстой", "api_key": "tolstoy"},
     {"name": "Михаил Лермонтов", "api_key": "lermont"},
 ]
