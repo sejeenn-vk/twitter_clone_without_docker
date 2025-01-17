@@ -13,8 +13,8 @@ from src.utils.images import delete_image_from_hdd
 
 
 async def get_tweets(
-    session: AsyncSession,
-    current_user: User,
+        session: AsyncSession,
+        current_user: User,
 ):
     """
     Пользователь может получить ленту из твитов отсортированных в
@@ -35,13 +35,10 @@ async def get_tweets(
             joinedload(Tweet.likes).subqueryload(Like.user),
             joinedload(Tweet.images),
         )
-        .join(Tweet.likes)
+        .outerjoin(Tweet.likes)
         .group_by(Tweet)
         .order_by(desc("likes_count"))
     )
-
-    # TODO: проблема данного кода в том, что если нет лайков у твита
-    # TODO: твит не появится в ленте новостей
 
     result = await session.execute(stmt)
     tweets = result.unique().scalars().all()
@@ -50,9 +47,9 @@ async def get_tweets(
 
 
 async def create_tweet(
-    tweet: TweetInSchema,
-    session: AsyncSession,
-    current_user: User,
+        tweet: TweetInSchema,
+        session: AsyncSession,
+        current_user: User,
 ):
     # tweet_data='ц' tweet_media_ids=[] как выглядит ответ от фронта
     # что нужно вставить в бд
@@ -83,7 +80,6 @@ async def create_tweet(
 
 
 async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
-
     # получаем твит, который нужно удалить, из него нужно вытащить
     # путь к файлу path_media
     tweet_stmt = (
