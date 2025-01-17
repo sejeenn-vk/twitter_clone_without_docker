@@ -2,7 +2,7 @@ import datetime
 from http import HTTPStatus
 
 from loguru import logger
-from sqlalchemy import select, func, desc, delete
+from sqlalchemy import select, func, desc, delete, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from src.core.models import User, Tweet, Like
@@ -112,3 +112,19 @@ async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
         await session.execute(stmt)
         await session.commit()
         logger.debug(f"Твит '{tweet.content[:5]}...' был удалён!")
+
+
+async def add_like_to_tweet(user, tweet_id, session):
+    logger.debug(
+        f"Добавление лайка твиту: {tweet_id}, от пользователя user_id: {user.id}"
+    )
+    stmt = insert(Like).values(user_id=user.id, tweet_id=tweet_id)
+    await session.execute(stmt)
+    await session.commit()
+
+
+async def delete_like_by_tweet(user, tweet_id, session):
+    logger.debug(f"Удаление лайка твита: {tweet_id}, от пользователя: {user.id}")
+    stmt = delete(Like).where(Like.user_id == user.id, Like.tweet_id == tweet_id)
+    await session.execute(stmt)
+    await session.commit()
