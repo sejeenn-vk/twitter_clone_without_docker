@@ -51,9 +51,6 @@ async def create_tweet(
         session: AsyncSession,
         current_user: User,
 ):
-    # tweet_data='ц' tweet_media_ids=[] как выглядит ответ от фронта
-    # что нужно вставить в бд
-    # {"content": "Будь здоров!", "user_id": 1, "created_at": datetime.datetime.now()}
 
     new_tweet = Tweet(
         content=tweet.tweet_data,
