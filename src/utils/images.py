@@ -1,16 +1,11 @@
 import os
-from typing import List
-
 import aiofiles
 from loguru import logger
 from http import HTTPStatus
 from contextlib import suppress
 from datetime import datetime
 from fastapi import UploadFile
-
-
 from src.core.config import ALLOWED_EXTENSIONS, IMAGES_FOLDER, STATIC_FOLDER
-from src.core.models import Image
 from src.utils.exeptions import CustomApiException
 
 
@@ -100,4 +95,3 @@ async def delete_image_from_hdd(images):
         logger.debug(f"Изображение - {images[0].path_media} удалено")
     except FileNotFoundError:
         logger.debug(f"Файл {images[0].path_media} не найден")
-

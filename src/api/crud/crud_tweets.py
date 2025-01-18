@@ -13,8 +13,8 @@ from src.utils.images import delete_image_from_hdd
 
 
 async def get_tweets(
-        session: AsyncSession,
-        current_user: User,
+    session: AsyncSession,
+    current_user: User,
 ):
     """
     Пользователь может получить ленту из твитов отсортированных в
@@ -47,9 +47,9 @@ async def get_tweets(
 
 
 async def create_tweet(
-        tweet: TweetInSchema,
-        session: AsyncSession,
-        current_user: User,
+    tweet: TweetInSchema,
+    session: AsyncSession,
+    current_user: User,
 ):
 
     new_tweet = Tweet(
