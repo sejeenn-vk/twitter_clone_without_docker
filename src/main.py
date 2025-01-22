@@ -18,10 +18,12 @@ async def lifespan(app: FastAPI):
     lifespan.
     """
     async with db_helper.engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        # await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
-        await insert_data(conn)
+        # await insert_data(conn)
     yield
+    # закрывает все соединения и освобождает ресурсы после работы
+    # с базой данных
     await db_helper.dispose()
 
 

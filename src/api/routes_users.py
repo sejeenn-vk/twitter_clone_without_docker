@@ -110,3 +110,9 @@ async def follow_to_user(
     """
     await subscribe_to_user(user=current_user, user_id=user_id, session=session)
     return {"result": True}
+
+
+# ======================for test endpoint========================
+@users_route.get("/test", status_code=200)
+async def endpoint_for_test():
+    return "OK"
