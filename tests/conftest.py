@@ -1,52 +1,47 @@
-import asyncio
-from typing import Any, AsyncGenerator, Annotated, Generator
+import json
+from collections.abc import AsyncGenerator
 
-import pytest
+import data_for_tests
 import pytest_asyncio
-from fastapi import Depends
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy import insert
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy import NullPool, insert
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from src.core.models import User, db_helper
+from src.core.config import settings
+from src.core.models.model_base import Base
+from src.core.models.model_images import Image
+from src.core.models.model_likes import Like
+from src.core.models.model_tweets import Tweet
+from src.core.models.model_users import User, followers_tbl
 from src.main import main_app
 
-users_data = [
-    {"name": "Евгений Воронцов", "api_key": "test"},
-    {"name": "Владимир Ульянов", "api_key": "lenin"},
-]
-#     session: Annotated[AsyncSession, Depends(db_helper.session_getter)]
-client = TestClient(main_app)
+# Создание тестовых движка и сессии
+test_engine = create_async_engine(str(settings.db.url), poolclass=NullPool, echo=True)
+test_async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(autouse=True, scope="session")
+async def prepare_database():
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+        await conn.execute(insert(User), data_for_tests.users_data)
+        await conn.execute(insert(followers_tbl), data_for_tests.followed_data)
+        await conn.execute(insert(Tweet), data_for_tests.tweet_data)
+        await conn.execute(insert(Like), data_for_tests.like_data)
+        await conn.execute(insert(Image), data_for_tests.image_data)
+
+        await conn.commit()
+    yield
+    async with test_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest_asyncio.fixture(scope="session")
 async def ac() -> AsyncGenerator[AsyncClient, None]:
     async with AsyncClient(
         transport=ASGITransport(app=main_app),
         base_url="http://test",
-        headers={"Content-Type": "application/json"},
     ) as async_test_client:
         yield async_test_client
-
-
-@pytest.fixture(scope="session")
-async def users(session: Annotated[AsyncSession, Depends(db_helper.session_getter)]):
-    """
-    Пользователи для тестирования
-    """
-    print(
-        "====5678===================+++++================843==========================="
-    )
-    user_1 = User(name="test-user1", api_key="test-user1")
-    user_2 = User(name="test-user2", api_key="test-user2")
-    user_3 = User(name="test-user3", api_key="test-user3")
-
-    # Подписки пользователей
-    user_1.following.append(user_2)
-    user_2.following.append(user_1)
-
-    session.add_all([user_1, user_2, user_3])
-    await session.commit()
-
-    return user_1, user_2, user_3

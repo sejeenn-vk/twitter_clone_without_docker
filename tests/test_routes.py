@@ -1,15 +1,17 @@
-import pytest
+import loguru
 from httpx import AsyncClient
-from loguru import logger
-
-#
-# async def test_main_route(ac: AsyncClient) -> None:
-#     response = await ac.get("http://0.0.0.0")
-#     assert response.status_code == 200
 
 
-@pytest.mark.asyncio
 async def test_root(ac: AsyncClient):
-    # Тест проверки главной страницы
-    response = await ac.get("/api/users/me")
-    # assert response.status_code == 200
+    """
+    {'result': True, 'user': {'id': 1, 'name': 'Test User',
+    'followers': [{'id': 2, 'name': 'Тестовый Пользователь'}],
+    'following': [{'id': 2, 'name': 'Тестовый Пользователь'}]}}
+    :param ac:
+    :return:
+    """
+    response = await ac.get("/api/users/me", headers={"api-key": "test_1"})
+    data = response.json()
+    assert response.status_code == 200
+    # assert data.result == True
+    print("======================================================", data)

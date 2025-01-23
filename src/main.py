@@ -17,10 +17,10 @@ async def lifespan(app: FastAPI):
     будут перезаписаны в начальное значение, для этого и используется
     lifespan.
     """
-    async with db_helper.engine.begin() as conn:
-        # await conn.run_sync(Base.metadata.drop_all)
-        await conn.run_sync(Base.metadata.create_all)
-        # await insert_data(conn)
+    # async with db_helper.engine.begin() as conn:
+    # await conn.run_sync(Base.metadata.drop_all)
+    # await conn.run_sync(Base.metadata.create_all)
+    # await insert_data(conn)
     yield
     # закрывает все соединения и освобождает ресурсы после работы
     # с базой данных

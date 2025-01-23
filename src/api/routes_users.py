@@ -1,5 +1,5 @@
 from typing import Annotated
-
+from loguru import logger
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -29,7 +29,14 @@ async def get_users_me(
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     api_key: Annotated[str | None, Header()] = None,
 ):
+    """
+    Роут для получения пользователя с текущим api_key
+    :param session:
+    :param api_key:
+    :return:
+    """
     user = await crud_users.get_user_by_api_key(session=session, api_key=api_key)
+
     data = {
         "result": "true",
         "user": {
