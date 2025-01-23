@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     """
     Если приложение будет перезапущено, все данные в базе данных
     будут перезаписаны в начальное значение, для этого и используется
-    lifespan.
+    lifespan. Чтобы не оставалось незакрытых подключений к БД.
     """
     # async with db_helper.engine.begin() as conn:
     # await conn.run_sync(Base.metadata.drop_all)
