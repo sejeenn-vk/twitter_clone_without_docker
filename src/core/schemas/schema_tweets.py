@@ -2,18 +2,10 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from .schema_base import ResponseSchema
 from .schema_images import ImagePathSchema
 from .schema_users import BaseUserSchema
 from .schema_likes import LikeSchema
-
-
-class ResponseSchema(BaseModel):
-    """
-    Базовая схема для возврата успешного ответа
-    """
-
-    result: bool = True
-    model_config = ConfigDict(from_attributes=True)
 
 
 class TweetResponseSchema(ResponseSchema):
