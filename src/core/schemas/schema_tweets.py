@@ -7,7 +7,16 @@ from .schema_users import BaseUserSchema
 from .schema_likes import LikeSchema
 
 
-class TweetResponse(BaseModel):
+class ResponseSchema(BaseModel):
+    """
+    Базовая схема для возврата успешного ответа
+    """
+
+    result: bool = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TweetResponseSchema(ResponseSchema):
     """
     Схема для вывода id твита после публикации
     """

@@ -32,3 +32,38 @@ image_data = [
     {"tweet_id": 1, "path_media": "images/123.jpg"},
     {"tweet_id": 2, "path_media": "images/321.jpg"},
 ]
+
+good_response_get_tweets = {
+    "tweets": [
+        {
+            "id": 2,
+            "content": "Текст для теста твита",
+            "author": {"id": 2, "name": "Тестовый " "Пользователь"},
+            "likes": [{"user_id": 1, "name": "Test User"}],
+            "attachments": ["images/321.jpg"],
+        },
+        {
+            "id": 1,
+            "content": "Text for test tweet",
+            "author": {"id": 1, "name": "Test User"},
+            "likes": [{"user_id": 2, "name": "Тестовый Пользователь"}],
+            "attachments": ["images/123.jpg"],
+        },
+    ]
+}
+
+good_response_user = {
+    "result": True,
+    "user": {
+        "id": 1,
+        "name": "Test User",
+        "followers": [{"id": 2, "name": "Тестовый Пользователь"}],
+        "following": [{"id": 2, "name": "Тестовый Пользователь"}],
+    },
+}
+
+good_response_result = {"result": True}
+
+good_response_create_tweet = {"result": True, "tweet_id": 3}
+
+good_response_image_load = {"result": True, "media_id": 3}

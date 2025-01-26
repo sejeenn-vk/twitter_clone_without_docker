@@ -10,7 +10,11 @@ from src.api.crud.crud_tweets import (
 )
 from src.api.crud.crud_users import get_current_user
 from src.api.crud import crud_tweets
-from src.core.schemas.schema_tweets import TweetListSchema, TweetInSchema
+from src.core.schemas.schema_tweets import (
+    TweetListSchema,
+    TweetInSchema,
+    TweetResponseSchema,
+)
 from src.core.models.db_helper import db_helper
 from src.core.models.model_users import User
 
@@ -41,12 +45,14 @@ async def get_tweets_follow_user(
 @tweets_route.post(
     "",
     status_code=201,
+    response_model=TweetResponseSchema,
     tags=["Создание нового твита"],
 )
 async def create_new_tweet(
     tweet: TweetInSchema,
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     current_user: Annotated[User, Depends(get_current_user)],
+    api_key: Annotated[str | None, Header()] = "test",
 ):
     """
     Создание нового твита
