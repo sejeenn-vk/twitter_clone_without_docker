@@ -18,15 +18,10 @@ from src.core.schemas.schema_tweets import (
 from src.core.models.db_helper import db_helper
 from src.core.models.model_users import User
 
-tweets_route = APIRouter(prefix="/api/tweets")
+tweets_route = APIRouter(prefix="/api/tweets", tags=["Операции с твитами"])
 
 
-@tweets_route.get(
-    "",
-    status_code=200,
-    response_model=TweetListSchema,
-    tags=["Получение твитов, пользователей, на которых подписан текущий пользователь"],
-)
+@tweets_route.get("", status_code=200, response_model=TweetListSchema)
 async def get_tweets_follow_user(
     session: Annotated[
         AsyncSession,
@@ -36,18 +31,15 @@ async def get_tweets_follow_user(
     api_key: Annotated[str | None, Header()] = "test",
 ):
     """
-    Получение твитов
+    Получение твитов, отсортированных в
+    порядке убывания, по популярности, от пользователей, которых он
+    читает.
     """
     tweets = await crud_tweets.get_tweets(session=session, current_user=current_user)
     return {"tweets": tweets}
 
 
-@tweets_route.post(
-    "",
-    status_code=201,
-    response_model=TweetResponseSchema,
-    tags=["Создание нового твита"],
-)
+@tweets_route.post("", status_code=201, response_model=TweetResponseSchema)
 async def create_new_tweet(
     tweet: TweetInSchema,
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
@@ -55,7 +47,7 @@ async def create_new_tweet(
     api_key: Annotated[str | None, Header()] = "test",
 ):
     """
-    Создание нового твита
+    Создание нового твита.
     """
     new_tweet = await crud_tweets.create_tweet(
         tweet=tweet, current_user=current_user, session=session
@@ -63,17 +55,14 @@ async def create_new_tweet(
     return {"tweet_id": new_tweet.id}
 
 
-@tweets_route.delete(
-    "/{tweet_id}", status_code=200, tags=["Удаление твита по его tweet_id"]
-)
+@tweets_route.delete("/{tweet_id}", status_code=200)
 async def delete_tweet_by_tweet_id(
     tweet_id: int,
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     """
-    В этом endpoint мы должны убедиться, что пользователь удаляет
-    именно свой собственный твит.
+    Удаление твита, пользователь может удалить только свой твит.
     :param tweet_id:
     :param session:
     :param current_user:
@@ -90,7 +79,7 @@ async def add_like(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     """
-    Ставим лайк конкретному твиту
+    Ставим лайк твиту
     """
     await add_like_to_tweet(user=current_user, tweet_id=tweet_id, session=session)
     return {"result": True}
@@ -103,7 +92,7 @@ async def delete_like(
     current_user: Annotated[User, Depends(get_current_user)],
 ):
     """
-    Удаляем лайк конкретному твиту
+    Удаляем лайк твиту
     """
     await delete_like_by_tweet(user=current_user, tweet_id=tweet_id, session=session)
     return {"result": True}
