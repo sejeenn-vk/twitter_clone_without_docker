@@ -1,14 +1,7 @@
 from pydantic import BaseModel, ConfigDict
 from pydantic import Field
 
-
-class ResponseSchema(BaseModel):
-    """
-    Базовая схема для возврата успешного ответа
-    """
-
-    result: bool = True
-    model_config = ConfigDict(from_attributes=True)
+from src.core.schemas.schema_base import ResponseSchema
 
 
 class ImageResponseSchema(ResponseSchema):

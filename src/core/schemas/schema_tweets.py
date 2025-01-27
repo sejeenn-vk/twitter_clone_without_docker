@@ -2,12 +2,13 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
+from .schema_base import ResponseSchema
 from .schema_images import ImagePathSchema
 from .schema_users import BaseUserSchema
 from .schema_likes import LikeSchema
 
 
-class TweetResponse(BaseModel):
+class TweetResponseSchema(ResponseSchema):
     """
     Схема для вывода id твита после публикации
     """
