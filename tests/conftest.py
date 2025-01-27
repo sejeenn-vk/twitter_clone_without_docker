@@ -16,8 +16,9 @@ from src.core.models.model_tweets import Tweet
 from src.core.models.model_users import User, followers_tbl
 from src.main import main_app
 
+
 # Создание тестовых движка и сессии
-test_engine = create_async_engine(str(settings.db.url), poolclass=NullPool, echo=True)
+test_engine = create_async_engine(str(settings.db.url), poolclass=NullPool, echo=False)
 test_async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
 
@@ -54,39 +55,3 @@ async def ac() -> AsyncGenerator[AsyncClient, None]:
         base_url="http://test",
     ) as async_test_client:
         yield async_test_client
-
-
-@pytest_asyncio.fixture(scope="session")
-async def headers():
-    """
-    Параметр в header для выполнения запросов
-    """
-    return {"api-key": "test_1"}
-
-
-@pytest_asyncio.fixture(scope="session")
-async def new_tweet() -> Dict:
-    """
-    Данные для добавления нового твита
-    """
-    return {"tweet_data": "Тестовый твит", "tweet_media_ids": []}
-
-
-@pytest_asyncio.fixture(scope="session")
-async def headers_with_content_type(headers: Dict) -> Dict:
-    """
-    Заголовок при добавлении нового твита
-    """
-    headers["Content-Type"] = "application/json"
-    return headers
-
-
-@pytest_asyncio.fixture(scope="class")
-async def resp_for_new_tweet(good_response: Dict) -> Dict:
-    """
-    Успешный ответ при добавлении нового твита
-    """
-    good_resp = good_response.copy()
-    # id = 4, т.к. фикстурами уже создано 2 твита
-    good_resp["tweet_id"] = 3
-    return good_resp
