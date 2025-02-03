@@ -1,11 +1,11 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from .schema_base import ResponseSchema
 from .schema_images import ImagePathSchema
-from .schema_users import BaseUserSchema
 from .schema_likes import LikeSchema
+from .schema_users import BaseUserSchema
 
 
 class TweetResponseSchema(ResponseSchema):

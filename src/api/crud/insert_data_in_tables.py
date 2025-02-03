@@ -1,10 +1,11 @@
 import datetime
 
 from sqlalchemy import insert
-from src.core.models.model_likes import Like
-from src.core.models.model_users import User, followers_tbl
-from src.core.models.model_tweets import Tweet
+
 from src.core.models.model_images import Image
+from src.core.models.model_likes import Like
+from src.core.models.model_tweets import Tweet
+from src.core.models.model_users import User, followers_tbl
 
 users_data = [
     {"name": "Евгений Воронцов", "api_key": "test"},
@@ -15,8 +16,16 @@ users_data = [
 ]
 
 tweet_data = [
-    {"content": "Будь здоров!", "user_id": 1, "created_at": datetime.datetime.now()},
-    {"content": "Всегда здоров!", "user_id": 3, "created_at": datetime.datetime.now()},
+    {
+        "content": "Будь здоров!",
+        "user_id": 1,
+        "created_at": datetime.datetime.now(),
+    },
+    {
+        "content": "Всегда здоров!",
+        "user_id": 3,
+        "created_at": datetime.datetime.now(),
+    },
     {
         "content": "Ленин жил, Ленин жив, Ленин будет жить!",
         "user_id": 2,

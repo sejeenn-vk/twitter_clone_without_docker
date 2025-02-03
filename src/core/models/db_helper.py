@@ -27,11 +27,13 @@ class DatabaseHelper:
             max_overflow=max_overflow,
         )
 
-        self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
-            bind=self.engine,
-            autoflush=False,
-            autocommit=False,
-            expire_on_commit=False,
+        self.session_factory: async_sessionmaker[AsyncSession] = (
+            async_sessionmaker(
+                bind=self.engine,
+                autoflush=False,
+                autocommit=False,
+                expire_on_commit=False,
+            )
         )
 
     async def dispose(self) -> None:
@@ -43,9 +45,11 @@ class DatabaseHelper:
 
 
 db_helper = DatabaseHelper(
-    url=str(settings.db.url),
-    echo=settings.db.echo,
-    echo_pool=settings.db.echo_pool,
-    pool_size=settings.db.pool_size,
-    max_overflow=settings.db.max_overflow,
+    url=str(settings.db.db_url),
+    echo=settings.db.DB_ECHO,
+    # echo_pool=settings.db.echo_pool,
+    # pool_size=settings.db.pool_size,
+    # max_overflow=settings.db.max_overflow,
 )
+
+# print(settings.db.db_url)

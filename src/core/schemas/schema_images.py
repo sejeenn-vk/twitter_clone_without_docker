@@ -1,5 +1,4 @@
-from pydantic import BaseModel, ConfigDict
-from pydantic import Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.core.schemas.schema_base import ResponseSchema
 

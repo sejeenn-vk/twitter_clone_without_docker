@@ -1,11 +1,11 @@
-from loguru import logger
-from typing import Optional, Annotated
+from typing import Annotated, Optional
 
-from fastapi import Security, Depends
+from fastapi import Depends, Security
 from fastapi.security import APIKeyHeader
-from sqlalchemy import select, delete, insert
-from sqlalchemy.orm import joinedload
+from loguru import logger
+from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from starlette.requests import Request
 
 from src.core.models import User, db_helper
@@ -81,8 +81,12 @@ async def get_current_user(
     return user
 
 
-async def unsubscribe_from_user(user: User, user_id: int, session: AsyncSession):
-    logger.debug(f"Пользователь {user.id} отписывается от пользователя {user_id}")
+async def unsubscribe_from_user(
+    user: User, user_id: int, session: AsyncSession
+):
+    logger.debug(
+        f"Пользователь {user.id} отписывается от пользователя {user_id}"
+    )
     stmt = delete(followers_tbl).where(
         followers_tbl.c.follower_id == user.id,
         followers_tbl.c.followed_id == user_id,
@@ -92,7 +96,11 @@ async def unsubscribe_from_user(user: User, user_id: int, session: AsyncSession)
 
 
 async def subscribe_to_user(user: User, user_id: int, session: AsyncSession):
-    logger.debug(f"Пользователь {user.id} подписывается на пользователя {user_id}")
-    stmt = insert(followers_tbl).values(follower_id=user.id, followed_id=user_id)
+    logger.debug(
+        f"Пользователь {user.id} подписывается на пользователя {user_id}"
+    )
+    stmt = insert(followers_tbl).values(
+        follower_id=user.id, followed_id=user_id
+    )
     await session.execute(stmt)
     await session.commit()

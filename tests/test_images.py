@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from httpx import AsyncClient
+
 from tests.data_for_tests import good_response_image_load
 
 _TEST_ROOT_DIR = Path(__file__).resolve().parents[1]

@@ -2,12 +2,13 @@ import datetime
 from http import HTTPStatus
 
 from loguru import logger
-from sqlalchemy import select, func, desc, delete, insert
+from sqlalchemy import delete, desc, func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
-from src.core.models import User, Tweet, Like
-from src.core.schemas.schema_tweets import TweetInSchema
+
 from src.api.crud.crud_images import update_image
+from src.core.models import Like, Tweet, User
+from src.core.schemas.schema_tweets import TweetInSchema
 from src.utils.exeptions import CustomApiException
 from src.utils.images import delete_image_from_hdd
 
@@ -68,7 +69,9 @@ async def create_tweet(
         # Привязываем изображения к твиту
         # для этого нужны: tweet_media_ids, new_tweet.id, session
         await update_image(
-            tweet_media_ids=tweet_media_ids, tweet_id=new_tweet.id, session=session
+            tweet_media_ids=tweet_media_ids,
+            tweet_id=new_tweet.id,
+            session=session,
         )
     # Сохраняем в БД все изменения (новый твит + привязку картинок к твиту)
     await session.commit()
@@ -80,7 +83,9 @@ async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
     # получаем твит, который нужно удалить, из него нужно вытащить
     # путь к файлу path_media
     tweet_stmt = (
-        select(Tweet).where(Tweet.id == tweet_id).options(joinedload(Tweet.images))
+        select(Tweet)
+        .where(Tweet.id == tweet_id)
+        .options(joinedload(Tweet.images))
     )
     result = await session.execute(tweet_stmt)
     tweet = result.unique().scalars().one()
@@ -94,7 +99,9 @@ async def delete_tweet(user: User, tweet_id: int, session: AsyncSession):
             detail="The tweet that is being accessed is locked",
         )
     else:
-        logger.debug(f"Удаление твита по его tweet_id = {tweet_id} из базы данных")
+        logger.debug(
+            f"Удаление твита по его tweet_id = {tweet_id} из базы данных"
+        )
         # Удаляем изображения твита из файловой системы, если есть
         if not tweet.images:
             logger.debug("Изображений нет, удалять нечего")
@@ -117,7 +124,11 @@ async def add_like_to_tweet(user, tweet_id, session):
 
 
 async def delete_like_by_tweet(user, tweet_id, session):
-    logger.debug(f"Удаление лайка твита: {tweet_id}, от пользователя: {user.id}")
-    stmt = delete(Like).where(Like.user_id == user.id, Like.tweet_id == tweet_id)
+    logger.debug(
+        f"Удаление лайка твита: {tweet_id}, от пользователя: {user.id}"
+    )
+    stmt = delete(Like).where(
+        Like.user_id == user.id, Like.tweet_id == tweet_id
+    )
     await session.execute(stmt)
     await session.commit()

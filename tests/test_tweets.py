@@ -1,9 +1,10 @@
 import json
 
 from httpx import AsyncClient
+
 from tests.data_for_tests import (
-    good_response_get_tweets,
     good_response_create_tweet,
+    good_response_get_tweets,
     good_response_result,
 )
 
@@ -24,7 +25,9 @@ async def test_add_new_tweet(ac: AsyncClient):
     """
     response = await ac.post(
         "/api/tweets",
-        content=json.dumps({"tweet_data": "Tweet for test", "tweet_media_ids": []}),
+        content=json.dumps(
+            {"tweet_data": "Tweet for test", "tweet_media_ids": []}
+        ),
         headers={"Content-Type": "application/json", "api-key": "test_1"},
     )
     data = response.json()

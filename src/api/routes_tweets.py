@@ -3,20 +3,20 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Header
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.crud import crud_tweets
 from src.api.crud.crud_tweets import (
-    delete_tweet,
     add_like_to_tweet,
     delete_like_by_tweet,
+    delete_tweet,
 )
 from src.api.crud.crud_users import get_current_user
-from src.api.crud import crud_tweets
-from src.core.schemas.schema_tweets import (
-    TweetListSchema,
-    TweetInSchema,
-    TweetResponseSchema,
-)
 from src.core.models.db_helper import db_helper
 from src.core.models.model_users import User
+from src.core.schemas.schema_tweets import (
+    TweetInSchema,
+    TweetListSchema,
+    TweetResponseSchema,
+)
 
 tweets_route = APIRouter(prefix="/api/tweets", tags=["Операции с твитами"])
 
@@ -35,7 +35,9 @@ async def get_tweets_follow_user(
     порядке убывания, по популярности, от пользователей, которых он
     читает.
     """
-    tweets = await crud_tweets.get_tweets(session=session, current_user=current_user)
+    tweets = await crud_tweets.get_tweets(
+        session=session, current_user=current_user
+    )
     return {"tweets": tweets}
 
 
@@ -81,7 +83,9 @@ async def add_like(
     """
     Ставим лайк твиту
     """
-    await add_like_to_tweet(user=current_user, tweet_id=tweet_id, session=session)
+    await add_like_to_tweet(
+        user=current_user, tweet_id=tweet_id, session=session
+    )
     return {"result": True}
 
 
@@ -94,5 +98,7 @@ async def delete_like(
     """
     Удаляем лайк твиту
     """
-    await delete_like_by_tweet(user=current_user, tweet_id=tweet_id, session=session)
+    await delete_like_by_tweet(
+        user=current_user, tweet_id=tweet_id, session=session
+    )
     return {"result": True}

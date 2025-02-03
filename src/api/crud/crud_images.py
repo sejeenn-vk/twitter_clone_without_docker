@@ -1,7 +1,7 @@
 from fastapi import UploadFile
-from sqlalchemy import update, delete
-from sqlalchemy.ext.asyncio import AsyncSession
 from loguru import logger
+from sqlalchemy import delete, update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.models import User
 from src.core.models.model_images import Image
@@ -25,6 +25,10 @@ async def image_save(image_file: UploadFile, session: AsyncSession) -> int:
 
 async def update_image(tweet_media_ids, tweet_id, session: AsyncSession):
     logger.info("Обновление информации о картинке. Связь с твитом.")
-    query = update(Image).where(Image.id.in_(tweet_media_ids)).values(tweet_id=tweet_id)
+    query = (
+        update(Image)
+        .where(Image.id.in_(tweet_media_ids))
+        .values(tweet_id=tweet_id)
+    )
     await session.execute(query)
     await session.commit()

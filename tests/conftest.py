@@ -1,11 +1,14 @@
 from collections.abc import AsyncGenerator
-from typing import Dict
 
 import data_for_tests
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import NullPool, insert
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from src.core.config import settings
 from src.core.models import db_helper
@@ -16,10 +19,13 @@ from src.core.models.model_tweets import Tweet
 from src.core.models.model_users import User, followers_tbl
 from src.main import main_app
 
-
 # Создание тестовых движка и сессии
-test_engine = create_async_engine(str(settings.db.url), poolclass=NullPool, echo=False)
-test_async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False)
+test_engine = create_async_engine(
+    settings.db.db_url, poolclass=NullPool, echo=False
+)
+test_async_session = async_sessionmaker(
+    bind=test_engine, expire_on_commit=False
+)
 
 
 async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
@@ -27,7 +33,9 @@ async def override_get_async_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
-main_app.dependency_overrides[db_helper.session_getter] = override_get_async_session
+main_app.dependency_overrides[db_helper.session_getter] = (
+    override_get_async_session
+)
 
 
 @pytest_asyncio.fixture(autouse=True, scope="session")

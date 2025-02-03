@@ -1,5 +1,6 @@
-from pydantic import BaseModel, ConfigDict
 from http import HTTPStatus
+
+from pydantic import BaseModel, ConfigDict
 
 
 class ResponseSchema(BaseModel):

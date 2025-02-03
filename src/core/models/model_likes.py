@@ -10,8 +10,12 @@ class Like(Base):
     """
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    tweet_id: Mapped[int] = mapped_column(ForeignKey("tweets.id", ondelete="CASCADE"))
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE")
+    )
+    tweet_id: Mapped[int] = mapped_column(
+        ForeignKey("tweets.id", ondelete="CASCADE")
+    )
 
     # Отключаем проверку строк, тем самым убирая уведомление,
     # возникающее при удалении несуществующей строки

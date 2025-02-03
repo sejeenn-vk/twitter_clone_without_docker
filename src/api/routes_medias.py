@@ -1,13 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, UploadFile, Depends
+from fastapi import APIRouter, Depends, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.api.crud.crud_images import image_save
 from src.core.models import db_helper
 from src.core.schemas.schema_images import ImageResponseSchema
-from src.api.crud.crud_images import image_save
 
-medias_route = APIRouter(prefix="/api/medias", tags=["Операции с изображениями"])
+medias_route = APIRouter(
+    prefix="/api/medias", tags=["Операции с изображениями"]
+)
 
 
 @medias_route.post(

@@ -1,10 +1,12 @@
 import os
-import aiofiles
-from loguru import logger
-from http import HTTPStatus
 from contextlib import suppress
 from datetime import datetime
+from http import HTTPStatus
+
+import aiofiles
 from fastapi import UploadFile
+from loguru import logger
+
 from src.core.config import ALLOWED_EXTENSIONS, IMAGES_FOLDER, STATIC_FOLDER
 from src.utils.exeptions import CustomApiException
 
@@ -18,7 +20,10 @@ def allowed_image(image_name: str) -> None:
 
     # Проверяем, что расширение текущего файла есть в списке разрешенных
     # .rsplit('.', 1) - делит строку, начиная справа; 1 - делит 1 раз (по умолчанию -1 - неограниченное кол-во раз)
-    if "." in image_name and image_name.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS:
+    if (
+        "." in image_name
+        and image_name.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+    ):
         logger.info("Формат изображения корректный")
     else:
         logger.error("Неразрешенный формат изображения")
