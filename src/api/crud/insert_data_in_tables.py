@@ -1,3 +1,8 @@
+"""
+Вставка некоторых данных в таблицы базы данный,
+для демонстрации работы приложения.
+"""
+
 import datetime
 
 from sqlalchemy import insert
@@ -7,82 +12,61 @@ from src.core.models.model_likes import Like
 from src.core.models.model_tweets import Tweet
 from src.core.models.model_users import User, followers_tbl
 
-users_data = [
-    {"name": "Евгений Воронцов", "api_key": "test"},
-    {"name": "Владимир Ульянов", "api_key": "lenin"},
-    {"name": "Александр Пушкин", "api_key": "pushkin"},
-    {"name": "Лев Толстой", "api_key": "tolstoy"},
-    {"name": "Михаил Лермонтов", "api_key": "lermont"},
-]
+# -----------------------------------------------------------------
+NAMES = (
+    "Евгений Воронцов",
+    "Владимир Ульянов",
+    "Александр пушкин",
+    "Лев Толстой",
+    "Михаил Лермонтов",
+)
+API_KEYS = ("test", "lenin", "pushkin", "tolstoy", "lermont")
+USER_DATA = zip(NAMES, API_KEYS)
+USER_DATA_TPL = tuple(
+    {"name": user[0], "api_key": user[1]} for user in USER_DATA
+)
 
-tweet_data = [
+# -----------------------------------------------------------------
+TWEET_TEXTS = (
+    "Будь здоров!",
+    "Всегда здоров!",
+    "Ленин жил, Ленин жив, Ленин будет жить!",
+    "Я помню чудное мгновенье...",
+    "Белеет парус одинокой в тумане моря голубом!",
+)
+USER_IDS = (1, 2, 3, 4, 5)
+TWEET_DATA_ZIP = zip(TWEET_TEXTS, USER_IDS)
+TWEET_DATA = tuple(
     {
-        "content": "Будь здоров!",
-        "user_id": 1,
+        "tweet_text": tweet[0],
+        "user_id": tweet[1],
         "created_at": datetime.datetime.now(),
-    },
-    {
-        "content": "Всегда здоров!",
-        "user_id": 3,
-        "created_at": datetime.datetime.now(),
-    },
-    {
-        "content": "Ленин жил, Ленин жив, Ленин будет жить!",
-        "user_id": 2,
-        "created_at": datetime.datetime.now(),
-    },
-    {
-        "content": "Я помню чудное мгновенье...",
-        "user_id": 3,
-        "created_at": datetime.datetime.now(),
-    },
-    {
-        "content": "Белеет парус одинокой в тумане моря голубом!",
-        "user_id": 5,
-        "created_at": datetime.datetime.now(),
-    },
-    {
-        "content": "Пока народ безграмотен, из всех искусств "
-        "важнейшими для нас являются кино и цирк",
-        "user_id": 2,
-        "created_at": datetime.datetime.now(),
-    },
-]
+    }
+    for tweet in TWEET_DATA_ZIP
+)
 
-like_data = [
-    {"user_id": 1, "tweet_id": 2},
-    {"user_id": 2, "tweet_id": 2},
-    {"user_id": 3, "tweet_id": 2},
-    {"user_id": 1, "tweet_id": 3},
-    {"user_id": 2, "tweet_id": 3},
-    {"user_id": 1, "tweet_id": 4},
-    {"user_id": 1, "tweet_id": 5},
-    {"user_id": 2, "tweet_id": 5},
-    {"user_id": 3, "tweet_id": 5},
-    {"user_id": 4, "tweet_id": 5},
-    {"user_id": 5, "tweet_id": 5},
-    {"user_id": 5, "tweet_id": 1},
-]
+# -----------------------------------------------------------------
+LIKE_USER_IDS = (1, 2, 3, 1, 2, 1, 1, 2, 3, 4, 5)
+LIKE_TWEET_IDS = (2, 2, 2, 3, 3, 4, 5, 5, 5, 5, 5)
+LIKE_DATA_ZIP = zip(LIKE_USER_IDS, LIKE_TWEET_IDS)
+LIKE_DATA = tuple(
+    {"user_id": like[0], "tweet_id": like[1]} for like in LIKE_DATA_ZIP
+)
 
-followed_data = [
+# -----------------------------------------------------------------
+FOLLOWED_DATA = (
     {"follower_id": 1, "followed_id": 2},
     {"follower_id": 1, "followed_id": 3},
     {"follower_id": 1, "followed_id": 5},
-    {"follower_id": 5, "followed_id": 1},
-    {"follower_id": 2, "followed_id": 3},
-    {"follower_id": 3, "followed_id": 1},
-]
+)
 
-image_data = [
-    {"tweet_id": 5, "path_media": "images/123.jpg"},
-    {"tweet_id": 2, "path_media": "images/321.jpg"},
-    {"tweet_id": 4, "path_media": "images/111.jpg"},
-]
+# -----------------------------------------------------------------
+IMAGE_DATA = ({"tweet_id": 5, "path_media": "images/111.jpg"},)
 
 
 async def insert_data(conn):
-    await conn.execute(insert(User), users_data)
-    await conn.execute(insert(Tweet), tweet_data)
-    await conn.execute(insert(Like), like_data)
-    await conn.execute(insert(followers_tbl), followed_data)
-    await conn.execute(insert(Image), image_data)
+    await conn.execute(insert(User), USER_DATA_TPL)
+    await conn.execute(insert(Tweet), TWEET_DATA)
+    await conn.execute(insert(Like), LIKE_DATA)
+    await conn.execute(insert(followers_tbl), FOLLOWED_DATA)
+    await conn.execute(insert(Image), IMAGE_DATA)

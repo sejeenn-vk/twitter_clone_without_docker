@@ -3,23 +3,31 @@ import os
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-ALLOWED_EXTENSIONS = {
+ALLOWED_EXTENSIONS = (
     "png",
     "jpg",
     "jpeg",
     "gif",
-}
+)
+
 STATIC_FOLDER = "/usr/share/nginx/static"
 IMAGES_FOLDER = os.path.join(STATIC_FOLDER, "images")
 
+API_KEY_DEFAULT = "test"
+USER_ID = "id"
+NAME = "name"
+MODEL = "model"
+RESULT_STR = "result"
+TEST_USER2 = "Тестовый Пользователь 2"
+
 
 class DBSettings(BaseSettings):
-    DB_NAME: str
-    DB_USER: str
-    DB_PASS: SecretStr
-    DB_HOST: str
-    DB_PORT: int
-    DB_ECHO: bool
+    db_name: str
+    db_user: str
+    db_pass: SecretStr
+    db_host: str
+    db_port: int
+    db_echo: bool
 
     echo_pool: bool = False
     pool_size: int = 50
@@ -41,7 +49,10 @@ class DBSettings(BaseSettings):
 
     @property
     def db_url(self):
-        return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS.get_secret_value()}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        password = self.db_pass.get_secret_value()
+        return "postgresql+asyncpg://{:s}:{:s}@{:s}:{:d}/{:s}".format(
+            self.db_user, password, self.db_host, self.db_port, self.db_name
+        )
 
 
 class Settings(BaseSettings):

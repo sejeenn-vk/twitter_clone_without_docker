@@ -1,16 +1,14 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Union
 
 from fastapi import Depends, Security
 from fastapi.security import APIKeyHeader
-from loguru import logger
 from sqlalchemy import delete, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from starlette.requests import Request
 
-from src.core.models import User, db_helper
-from src.core.models.model_users import followers_tbl
-from src.core.schemas.schema_users import CreateUserSchema
+from src.core.models.db_helper import db_helper
+from src.core.models.model_users import User, followers_tbl
 
 
 class APITokenHeader(APIKeyHeader):
@@ -23,44 +21,35 @@ class APITokenHeader(APIKeyHeader):
         return api_key
 
 
-TOKEN = APITokenHeader(name="api-key")
+TOKEN = Security(APITokenHeader(name="api-key"))
 
 
-async def get_user_by_api_key(
+async def get_user(
     session: AsyncSession,
-    api_key: str,
+    api_key_or_id: Union[str, int],
 ) -> User:
+    """
+    Получение пользователя по его api_key или id
+    :param session: асинхронная сессия
+    :param api_key_or_id: личный ключ пользователя, передается в http-header
+    :return: экземпляр класса User
+    """
+    if isinstance(
+        api_key_or_id, str
+    ):  # проверяем какого типа входящая переменная
+        parameter = User.api_key
+    else:
+        parameter = User.id
     stmt = (
         select(User)
-        .where(User.api_key == api_key)
-        .options(joinedload(User.followers).load_only(User.id, User.name))
-        .options(joinedload(User.followed).load_only(User.id, User.name))
+        .where(parameter == api_key_or_id)
+        .options(
+            joinedload(User.followers).load_only(User.id, User.name),
+            joinedload(User.followed).load_only(User.id, User.name),
+        )
     )
-    result = await session.scalars(stmt)
-    return result.unique().one()
-
-
-async def get_user_by_user_id(
-    session: AsyncSession,
-    user_id,
-) -> User:
-    stmt = (
-        select(User)
-        .where(User.id == user_id)
-        .options(joinedload(User.followers).load_only(User.id, User.name))
-        .options(joinedload(User.followed).load_only(User.id, User.name))
-    )
-    result = await session.scalars(stmt)
-    return result.unique().one()
-
-
-async def create_user(
-    session: AsyncSession,
-    user_create: CreateUserSchema,
-) -> User:
-    user = User(**user_create.model_dump())
-    session.add(user)
-    await session.commit()
+    response = await session.scalars(stmt)
+    user = response.unique().one()
     return user
 
 
@@ -69,24 +58,28 @@ async def get_current_user(
         AsyncSession,
         Depends(db_helper.session_getter),
     ],
-    token: str = Security(TOKEN),
+    token: str = TOKEN,
 ):
+    """
+    Получение текущего пользователя из http-header по
+    его api_key
+    :param session: асинхронная сессия
+    :param token: токен api_key
+    :return: экземпляр класса User
+    """
     stmt = (
         select(User)
         .where(User.api_key == token)
         .options(joinedload(User.followed).load_only(User.id, User.name))
     )
-    result = await session.scalars(stmt)
-    user = result.unique().one()
+    response = await session.scalars(stmt)
+    user = response.unique().one()
     return user
 
 
 async def unsubscribe_from_user(
     user: User, user_id: int, session: AsyncSession
 ):
-    logger.debug(
-        f"Пользователь {user.id} отписывается от пользователя {user_id}"
-    )
     stmt = delete(followers_tbl).where(
         followers_tbl.c.follower_id == user.id,
         followers_tbl.c.followed_id == user_id,
@@ -96,9 +89,6 @@ async def unsubscribe_from_user(
 
 
 async def subscribe_to_user(user: User, user_id: int, session: AsyncSession):
-    logger.debug(
-        f"Пользователь {user.id} подписывается на пользователя {user_id}"
-    )
     stmt = insert(followers_tbl).values(
         follower_id=user.id, followed_id=user_id
     )

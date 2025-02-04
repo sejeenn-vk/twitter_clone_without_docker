@@ -1,104 +1,126 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header
-from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.api.crud import crud_users
 from src.api.crud.crud_users import (
     get_current_user,
+    get_user,
     subscribe_to_user,
     unsubscribe_from_user,
 )
-from src.core.models import User
+from src.core.config import API_KEY_DEFAULT, MODEL, NAME, RESULT_STR, USER_ID
 from src.core.models.db_helper import db_helper
-from src.core.schemas.schema_users import (
-    CreateUserSchema,
-    FullUserSchema,
-    UserReadSchema,
+from src.core.models.model_users import User
+from src.core.schemas.schema_base import (
+    ErrorResponseSchema,
+    LockedResponseSchema,
+    ResponseSchema,
+    UnauthorizedResponseSchema,
+    ValidationResponseSchema,
 )
+from src.core.schemas.schema_users import FullUserSchema
 
 users_route = APIRouter(
     prefix="/api/users", tags=["Операции с пользователями"]
 )
 
 
-@users_route.get("/me", response_model=FullUserSchema)
+@users_route.get(
+    "/me",
+    response_model=FullUserSchema,
+    responses={
+        401: {MODEL: UnauthorizedResponseSchema},
+        422: {MODEL: ValidationResponseSchema},
+    },
+)
 async def get_users_me(
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
-    api_key: Annotated[str | None, Header()] = None,
+    api_key: Annotated[str | int, Header()] = API_KEY_DEFAULT,
 ):
     """
-    Роут для получения пользователя с текущим api_key
-    :param session:
-    :param api_key:
-    :return:
+    Получение данных на текущего пользователя
+    :param session: асинхронная сессия
+    :param api_key: ключ, по которому идентифицируется пользователь
+    :return: json с данными на пользователя
     """
-    user = await crud_users.get_user_by_api_key(
-        session=session, api_key=api_key
-    )
-    data = {
-        "result": "true",
+    user = await get_user(session=session, api_key_or_id=api_key)
+    user_data = {
+        RESULT_STR: "true",
         "user": {
-            "id": user.id,
-            "name": user.name,
+            USER_ID: user.id,
+            NAME: user.name,
             "followers": [
-                {"id": u.id, "name": u.name} for u in user.followers
+                {USER_ID: follower.id, NAME: follower.name}
+                for follower in user.followers
             ],
-            "following": [{"id": u.id, "name": u.name} for u in user.followed],
+            "following": [
+                {USER_ID: followed.id, NAME: followed.name}
+                for followed in user.followed
+            ],
         },
     }
-    return data
+    return user_data
 
 
-@users_route.post("/me", response_model=UserReadSchema)
-async def create_user(
-    session: Annotated[
-        AsyncSession,
-        Depends(db_helper.session_getter),
-    ],
-    new_user: CreateUserSchema,
-):
-    """
-    Создание нового пользователя. В ТЗ данный роут не требовался.
-    """
-    user = await crud_users.create_user(session=session, user_create=new_user)
-    return user
-
-
-@users_route.get("/{user_id}", response_model=FullUserSchema)
+@users_route.get(
+    "/{user_id}",
+    response_model=FullUserSchema,
+    responses={
+        401: {MODEL: UnauthorizedResponseSchema},
+        422: {MODEL: ValidationResponseSchema},
+    },
+)
 async def get_user_by_id(
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     user_id: int,
+    api_key: Annotated[str | None, Header()] = API_KEY_DEFAULT,
 ):
     """
-    Получение данных пользователя по его id
+    Получение профиля пользователя по его id
+    :param api_key: ключ текущего пользователя
+    :param session: асинхронная сессия
+    :param user_id: id пользователя
+    :return: экземпляр класса User
     """
-    user = await crud_users.get_user_by_user_id(
-        session=session, user_id=user_id
-    )
-    data = {
-        "result": "true",
+    user = await get_user(session=session, api_key_or_id=user_id)
+    user_data = {
+        RESULT_STR: "true",
         "user": {
-            "id": user.id,
-            "name": user.name,
+            USER_ID: user.id,
+            NAME: user.name,
             "followers": [
-                {"id": u.id, "name": u.name} for u in user.followers
+                {USER_ID: follower.id, NAME: follower.name}
+                for follower in user.followers
             ],
-            "following": [{"id": u.id, "name": u.name} for u in user.followed],
+            "following": [
+                {USER_ID: followed.id, NAME: followed.name}
+                for followed in user.followed
+            ],
         },
     }
-    return data
+    return user_data
 
 
-@users_route.delete("/{user_id}/follow")
+@users_route.delete(
+    "/{user_id}/follow",
+    response_model=ResponseSchema,
+    responses={
+        401: {MODEL: UnauthorizedResponseSchema},
+        404: {MODEL: ErrorResponseSchema},
+        422: {MODEL: ValidationResponseSchema},
+        423: {MODEL: LockedResponseSchema},
+    },
+)
 async def unfollow_from_user(
     user_id: int,
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     current_user: Annotated[User, Depends(get_current_user)],
+    api_key: Annotated[str | None, Header()] = API_KEY_DEFAULT,
 ):
     """
     Отписаться от пользователя
+    :param api_key: ключ того кто отписывается (по умолчанию - test)
     :param user_id: id-пользователя от которого хотите отписаться
     :param session: асинхронная сессия
     :param current_user: ваш текущий пользователь
@@ -107,17 +129,28 @@ async def unfollow_from_user(
     await unsubscribe_from_user(
         user=current_user, user_id=user_id, session=session
     )
-    return {"result": True}
+    return {RESULT_STR: True}
 
 
-@users_route.post("/{user_id}/follow")
+@users_route.post(
+    "/{user_id}/follow",
+    response_model=ResponseSchema,
+    responses={
+        401: {MODEL: UnauthorizedResponseSchema},
+        404: {MODEL: ErrorResponseSchema},
+        422: {MODEL: ValidationResponseSchema},
+        423: {MODEL: LockedResponseSchema},
+    },
+)
 async def follow_to_user(
     user_id: int,
     session: Annotated[AsyncSession, Depends(db_helper.session_getter)],
     current_user: Annotated[User, Depends(get_current_user)],
+    api_key: Annotated[str | None, Header()] = API_KEY_DEFAULT,
 ):
     """
     Подписаться на пользователя
+    :param api_key: ключ того кто подписывается (по умолчанию - test)
     :param user_id: id-пользователя на которого подписываетесь
     :param session: асинхронная сессия
     :param current_user: ваш текущий пользователь
@@ -126,4 +159,4 @@ async def follow_to_user(
     await subscribe_to_user(
         user=current_user, user_id=user_id, session=session
     )
-    return {"result": True}
+    return {RESULT_STR: True}

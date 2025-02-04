@@ -14,7 +14,7 @@ class UserSchema(BaseModel):
 
 
 class FullUserSchema(BaseModel):
-    result: bool = True
+    result_user: bool = Field(alias="result", default=True)
     user: UserSchema
 
 

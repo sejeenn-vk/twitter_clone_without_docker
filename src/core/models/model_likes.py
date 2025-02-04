@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .model_base import Base
+from src.core.models.model_base import Base
 
 
 class Like(Base):
@@ -17,12 +17,12 @@ class Like(Base):
         ForeignKey("tweets.id", ondelete="CASCADE")
     )
 
+    def __repr__(self):
+        return (
+            f"Like(id={self.id}, user_id={self.user_id}, "
+            f"tweet_id={self.tweet_id})"
+        )
+
     # Отключаем проверку строк, тем самым убирая уведомление,
     # возникающее при удалении несуществующей строки
     __mapper_args__ = {"confirm_deleted_rows": False}
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(id={self.id}, "
-            f"tweet_id={self.tweet_id}, user_id={self.user_id})"
-        )

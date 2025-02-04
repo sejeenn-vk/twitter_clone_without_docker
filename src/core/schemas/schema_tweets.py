@@ -1,23 +1,12 @@
 from typing import List, Optional
 
+import loguru
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from .schema_base import ResponseSchema
-from .schema_images import ImagePathSchema
-from .schema_likes import LikeSchema
-from .schema_users import BaseUserSchema
-
-
-class TweetResponseSchema(ResponseSchema):
-    """
-    Схема для вывода id твита после публикации
-    """
-
-    id: int = Field(alias="tweet_id")
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,  # Использовать псевдоним вместо названия поля
-    )
+from src.core.schemas.schema_base import ResponseSchema
+from src.core.schemas.schema_images import ImagePathSchema
+from src.core.schemas.schema_likes import LikeSchema
+from src.core.schemas.schema_users import BaseUserSchema
 
 
 class TweetOutSchema(BaseModel):
@@ -26,7 +15,7 @@ class TweetOutSchema(BaseModel):
     """
 
     id: int
-    tweet_data: str = Field(
+    tweet_text: str = Field(
         alias="content",
         default="Белеет мой парус такой одинокий на фоне стальных кораблей.",
     )
@@ -35,15 +24,30 @@ class TweetOutSchema(BaseModel):
     images: List[str] = Field(alias="attachments")
 
     @field_validator("images", mode="before")
-    def serialize_images(cls, val: List[ImagePathSchema]):
+    def serialize_images(cls, img_values: List[ImagePathSchema]):
         """
-        Возвращаем список строк, ссылками на изображение
+        Возвращаем список строк, ссылкой на изображение
         """
-        if isinstance(val, list):
-            return [v.path_media for v in val]
+        if isinstance(img_values, list):
+            return [img_value.path_media for img_value in img_values]
+        loguru.logger.debug(
+            f"Путь к картинке ----------------------------> {img_values}"
+        )
+        return img_values
 
-        return val
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,  # Использовать псевдоним вместо названия поля
+    )
 
+
+class TweetInSchema(BaseModel):
+    """
+    Схема для входных данных при добавлении нового твита
+    """
+
+    tweet_data: str = Field()
+    tweet_media_ids: Optional[list[int]]
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,  # Использовать псевдоним вместо названия поля
@@ -58,13 +62,12 @@ class TweetListSchema(BaseModel):
     tweets: List[TweetOutSchema]
 
 
-class TweetInSchema(BaseModel):
+class TweetResponseSchema(ResponseSchema):
     """
-    Схема для входных данных при добавлении нового твита
+    Схема для вывода id твита после публикации
     """
 
-    tweet_data: str = Field()
-    tweet_media_ids: Optional[list[int]]
+    id: int = Field(alias="tweet_id")
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,  # Использовать псевдоним вместо названия поля

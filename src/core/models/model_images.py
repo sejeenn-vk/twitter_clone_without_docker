@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .model_base import Base
+from src.core.models.model_base import Base
 
 
 class Image(Base):

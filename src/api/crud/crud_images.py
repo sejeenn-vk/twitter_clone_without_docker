@@ -1,22 +1,17 @@
 from fastapi import UploadFile
-from loguru import logger
-from sqlalchemy import delete, update
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.models import User
 from src.core.models.model_images import Image
-from src.utils.images import writing_file_to_hdd
+from src.utils.image_files import writing_file_to_hdd
 
 
 async def image_save(image_file: UploadFile, session: AsyncSession) -> int:
     """
-    Сохранение изображения (без привязки к твиту)
+    Сохранение изображения (без привязки к твиту) на жестком диске
     """
-    # Сохранение изображения в файловой системе
-    logger.info("Сохранение картинки на жесткий диск")
     path = await writing_file_to_hdd(image_file=image_file)
     image_obj = Image(path_media=path)  # Создание экземпляра изображения
-    logger.info("Запись информации о картинке в БД")
     session.add(image_obj)  # Добавление изображения в БД
     await session.commit()  # Сохранение в БД
 
@@ -24,7 +19,6 @@ async def image_save(image_file: UploadFile, session: AsyncSession) -> int:
 
 
 async def update_image(tweet_media_ids, tweet_id, session: AsyncSession):
-    logger.info("Обновление информации о картинке. Связь с твитом.")
     query = (
         update(Image)
         .where(Image.id.in_(tweet_media_ids))
