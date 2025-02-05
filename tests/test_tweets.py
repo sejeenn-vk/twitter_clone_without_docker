@@ -57,7 +57,7 @@ async def test_add_tweet_like(ac: AsyncClient):
         headers={"Content-Type": "application/json", "api-key": "test_2"},
     )
     data = response.json()
-    assert response.status_code == 200
+    assert response.status_code == 201
     assert data == good_response_result
 
 

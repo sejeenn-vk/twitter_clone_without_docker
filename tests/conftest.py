@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.core.config import settings
-from src.core.models import db_helper
+from src.core.models.db_helper import db_helper
 from src.core.models.model_base import Base
 from src.core.models.model_images import Image
 from src.core.models.model_likes import Like

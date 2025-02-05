@@ -7,12 +7,12 @@ users_data = [
 
 tweet_data = [
     {
-        "content": "Text for test tweet",
+        "tweet_text": "Text for test tweet",
         "user_id": 1,
         "created_at": datetime.datetime.now(),
     },
     {
-        "content": "Текст для теста твита",
+        "tweet_text": "Текст для теста твита",
         "user_id": 2,
         "created_at": datetime.datetime.now(),
     },
